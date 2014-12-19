@@ -1,0 +1,3 @@
+[HookEngine] HookEngine initialized correctly.
+[Scanner] HeroPosition : occurrence found : 0x105336C7
+[main.c] .text patch address found : 105336c7
