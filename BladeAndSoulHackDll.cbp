@@ -49,6 +49,9 @@
 		</Unit>
 		<Unit filename="../HookEngine/HookEngine.h" />
 		<Unit filename="../Keyboard/KeyState.h" />
+		<Unit filename="../Keyboard/Keyboard.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="../MemProc/MemChunk.c">
 			<Option compilerVar="CC" />
 		</Unit>

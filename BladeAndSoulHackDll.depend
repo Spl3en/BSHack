@@ -63,7 +63,7 @@
 	"../BbQueue/BbQueue.h"
 	"../Win32Tools/Win32Tools.h"
 
-1416357547 c:\users\spl3en\desktop\c\win32tools\win32tools.h
+1419203676 c:\users\spl3en\desktop\c\win32tools\win32tools.h
 	<stdlib.h>
 	<windows.h>
 	<tlhelp32.h>
@@ -100,7 +100,7 @@
 	"Win32Tools/Win32Tools.h"
 	"Console/Console.h"
 
-1416357547 c:\users\spl3en\desktop\c\\win32tools\win32tools.h
+1419203676 c:\users\spl3en\desktop\c\\win32tools\win32tools.h
 	<stdlib.h>
 	<windows.h>
 	<tlhelp32.h>
@@ -140,7 +140,7 @@
 	<stdio.h>
 	<windows.h>
 
-1418998533 source:c:\users\spl3en\desktop\c\win32tools\win32tools.c
+1419203697 source:c:\users\spl3en\desktop\c\win32tools\win32tools.c
 	"Win32Tools.h"
 	"dbg/dbg.h"
 
@@ -164,7 +164,7 @@
 	"Utils/Utils.h"
 	"BbQueue/BbQueue.h"
 
-1419026228 source:c:\users\spl3en\desktop\c\bladeandsoulhackdll\main.c
+1419353204 source:c:\users\spl3en\desktop\c\bladeandsoulhackdll\main.c
 	<stdio.h>
 	<stdlib.h>
 	<windows.h>
@@ -192,10 +192,16 @@
 	<stdlib.h>
 	"../MemProc/MemProc.h"
 
-1418143287 c:\users\spl3en\desktop\c\\keyboard\keystate.h
+1419350950 c:\users\spl3en\desktop\c\\keyboard\keystate.h
 	"Utils/Utils.h"
 
 1417629868 c:\users\spl3en\desktop\c\\hookengine\hookengine.h
 	"Utils/Utils.h"
 	"BbQueue/BbQueue.h"
+
+1419350940 source:c:\users\spl3en\desktop\c\keyboard\keyboard.c
+	"KeyState.h"
+
+1419350950 c:\users\spl3en\desktop\c\keyboard\keystate.h
+	"Utils/Utils.h"
 

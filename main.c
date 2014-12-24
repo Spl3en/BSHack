@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#define _WIN32_WINNT 0x500
 #include <windows.h>
 #include "dbg/dbg.h"
 #include "MemProc/MemProc.h"
@@ -30,7 +31,7 @@ typedef struct _Unit
   int field_39;
   int field_40;
   char gap_17C[12];
-  int field_41;
+  int isNotMovable;
 } Unit;
 #pragma pack(pop)
 
@@ -59,23 +60,19 @@ void doPatch (DWORD addr, char *patch, int sizePatch, unsigned char *original, i
 	memcpy ((unsigned char *) addr, code, size);
 }
 
-EXPORT_FUNCTION bool
-is_key_typed (
-	unsigned char key
-) {
-	static KeyState states[256] = {[0 ... 255] = KEY_STATE_RELEASED};
-	bool keyPressed = GetKeyState (key) < 0;
+bool Unit_is_hero (Unit *unit)
+{
+	DWORD globalContainer = 0x11CAD218;
 
-	if (keyPressed) {
-		// The key has been pressed but not released yet
-		states[key] = KEY_STATE_PRESSED;
-		return false;
-	}
-
-	// On release, trigger the event
-	if (!keyPressed && states[key] == KEY_STATE_PRESSED) {
-		states[key] = KEY_STATE_RELEASED;
-		return true;
+	if (globalContainer) {
+		if ( *(DWORD *)(globalContainer + 960) > 0 ) {
+			DWORD v17 = *(DWORD *)(**(DWORD **)(globalContainer + 956) + 64);
+			if (v17) {
+				if (*(Unit **)(v17 + 496) == unit) {
+					return true;
+				}
+			}
+		}
 	}
 
 	return false;
@@ -84,18 +81,22 @@ is_key_typed (
 int offsetY = 0;
 BbQueue units;
 
+EXPORT_FUNCTION
 signed int __thiscall updateUnitPosition (void *this, Unit *unit, Position *offset, int a4, char a5, int a6)
 {
 	signed int __thiscall (*original_updateUnitPosition) (void *this, Unit *unit, Position *offset, int a4, char a5, int a6);
 	original_updateUnitPosition = (void *) HookEngine_get_original_function ((ULONG_PTR) updateUnitPosition);
 
-	if (offsetY != 0) {
-		if (!bb_queue_exists(&units, unit)) {
-			bb_queue_add (&units, unit);
-			offset->y += offsetY;
-		} else {
-			bb_queue_clear(&units);
-			offsetY = 0;
+	//if (Unit_is_hero (unit))
+	{
+		if (offsetY != 0) {
+			if (!bb_queue_exists(&units, unit)) {
+				bb_queue_add (&units, unit);
+				unit->posY += offsetY;
+			} else {
+				bb_queue_clear(&units);
+				offsetY = 0;
+			}
 		}
 	}
 
@@ -107,18 +108,21 @@ signed int __thiscall updateUnitPosition (void *this, Unit *unit, Position *offs
  */
 EXPORT_FUNCTION void startInjection (void)
 {
-	FILE * debugOutput = file_open ("C:/Users/Spl3en/Desktop/C/BladeAndSoulHackDll/Log.txt", "w+");
+	char *path = get_module_path ("BladeAndSoulHack.dll");
+	FILE * debugOutput = file_open (str_dup_printf("%s/Log.txt", path), "w+");
 	dbg_set_output (debugOutput);
 
-	if (!HookEngine_new ("C:/Users/Spl3en/Desktop/C/BladeAndSoulHackDll/NtHookEngine.dll")) {
+	struct tm now = *localtime ((time_t[]) {time(NULL)});
+	dbg ("====== Injection started at %d-%d-%d %02d:%02d:%02d ======",
+		now.tm_year + 1900, now.tm_mon + 1, now.tm_mday, now.tm_hour, now.tm_min, now.tm_sec);
+
+	if (!HookEngine_new (str_dup_printf("%s/NtHookEngine.dll", path))) {
 		fail ("HookEngine not found.");
 		return;
 	}
 
 	bb_queue_init (&units);
-	HookEngine_hook ((ULONG_PTR) 0x10532F10, (ULONG_PTR) &updateUnitPosition);
-
-
+	// HookEngine_hook ((ULONG_PTR) 0x10532F10, (ULONG_PTR) &updateUnitPosition);
 	/*
 		105336C7     F30F1043 5C       movss xmm0, [dword ds:ebx+5C]
 		105336CC     F30F584424 68     addss xmm0, [dword ss:esp+68]
@@ -167,25 +171,27 @@ EXPORT_FUNCTION void startInjection (void)
 	dbg (".text patch address found : %x", HeroPositionAddress);
 
 	bool activated = false;
-
-	while (1) {
+	bool running = true;
+	while (running) {
 		Sleep (10);
 
-		if (is_key_typed (0x5)) {
+		if (is_key_typed (VK_XBUTTON1)) {
+			activated = !activated;
 			doPatch (HeroPositionAddress, patch, sizeof(patch), pattern, sizeof(pattern), activated);
-			activated = !(activated);
 		}
 
 		if (is_key_typed (VK_ADD)) {
-			offsetY += 50;
+			offsetY += 100;
 		}
 
 		if (is_key_typed (VK_SUBTRACT)) {
-			offsetY -= 50;
+			offsetY -= 100;
 		}
 
 		if (is_key_typed(VK_F11)) {
 			HookEngine_unhook_all();
+			doPatch (HeroPositionAddress, patch, sizeof(patch), pattern, sizeof(pattern), false);
+			running = false;
 		}
 	}
 }
